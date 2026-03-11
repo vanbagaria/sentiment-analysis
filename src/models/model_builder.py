@@ -10,8 +10,11 @@ from tensorflow.keras.layers import (
 
 from tensorflow.keras.models import Model
 
-from models.attention_layers import SimpleAttention
-
+from models.attention_layers import (
+    SimpleAttention,
+    BahdanauAttention,
+    LuongAttention
+)
 
 def build_model(
         vocab_size,
@@ -43,6 +46,12 @@ def build_model(
     # Attention layer
     if attention == "simple":
         x = SimpleAttention()(x)
+
+    elif attention == "bahdanau":
+        x = BahdanauAttention(rnn_units)(x)
+
+    elif attention == "luong":
+        x = LuongAttention()(x)
 
     else:
         x = GlobalMaxPooling1D()(x)

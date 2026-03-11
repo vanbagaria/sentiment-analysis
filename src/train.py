@@ -10,8 +10,15 @@ from models.model_builder import build_model
 EXPERIMENTS = [
     ("lstm", None),
     ("gru", None),
+
     ("lstm", "simple"),
-    ("gru", "simple")
+    ("gru", "simple"),
+
+    ("lstm", "bahdanau"),
+    ("gru", "bahdanau"),
+
+    ("lstm", "luong"),
+    ("gru", "luong")
 ]
 
 def main():
