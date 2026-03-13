@@ -1,18 +1,11 @@
-from dataset import load_imdb_dataset
-from preprocess import preprocess_texts
-from utils.tokenizer import build_tokenizer, texts_to_padded_sequences
+from inference import SentimentPredictor
 
+predictor = SentimentPredictor("saved_models/lstm_luong.keras")
 
-texts, labels = load_imdb_dataset(split="train")
-
-texts = preprocess_texts(texts[:500])  # small sample for test
-
-tokenizer = build_tokenizer(texts)
-
-X = texts_to_padded_sequences(tokenizer, texts)
-
-print("Vocabulary size:", len(tokenizer.word_index))
-print("Shape of padded data:", X.shape)
-
-print("\nExample sequence:")
-print(X[0])
+input_line = ""
+while True:
+    print("Enter movie review text:")
+    input_line = input()
+    if(input_line == "exit"):
+        break
+    print("Sentiment: " + str(predictor.predict(input_line)))

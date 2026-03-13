@@ -16,6 +16,8 @@ from models.model_builder import build_model
 from evaluate import evaluate_model
 from plot_training import plot_training
 
+import pickle
+import json
 
 EXPERIMENTS = [
     ("lstm", None),
@@ -31,9 +33,7 @@ EXPERIMENTS = [
     ("gru", "luong")
 ]
 
-
 def main():
-
     print("\nLoading dataset...")
     texts, labels = load_imdb_dataset(split="train")
 
@@ -41,10 +41,8 @@ def main():
 
     print("Dataset size:", len(texts))
 
-
     print("\nPreprocessing text...")
     texts = preprocess_texts(texts)
-
 
     print("\nSplitting dataset...")
 
@@ -55,27 +53,27 @@ def main():
         random_state=42
     )
 
-
     print("\nBuilding tokenizer...")
 
     tokenizer = build_tokenizer(X_train_texts)
+    with open("saved_models/tokenizer.pkl", "wb") as f:
+        pickle.dump(tokenizer, f)
 
     X_train = texts_to_padded_sequences(tokenizer, X_train_texts)
     X_test = texts_to_padded_sequences(tokenizer, X_test_texts)
 
-
     vocab_size = len(tokenizer.word_index) + 1
     max_len = X_train.shape[1]
+
+    with open("saved_models/config.json", "w") as f:
+        json.dump({"max_len": max_len}, f)
 
     print("Vocabulary size:", vocab_size)
     print("Sequence length:", max_len)
 
-
     results = []
 
-
     for rnn_type, attention in EXPERIMENTS:
-
         print("\n======================================")
         print("Training model:", rnn_type, "Attention:", attention)
         print("======================================")
@@ -87,7 +85,6 @@ def main():
             attention=attention
         )
 
-
         history = model.fit(
             X_train,
             y_train,
@@ -96,6 +93,9 @@ def main():
             batch_size=64
         )
 
+        model_name = f"{rnn_type}_{attention if attention else 'none'}"
+        model.save("saved_models/" + model_name + ".keras")
+        print("Saved model: " + "saved_models/" + model_name + ".keras")
 
         metrics = evaluate_model(model, X_test, y_test)
 
@@ -105,11 +105,7 @@ def main():
         print("Recall   :", metrics["recall"])
         print("F1 Score :", metrics["f1"])
 
-
-        model_name = f"{rnn_type}_{attention if attention else 'none'}"
-
         plot_training(history, model_name)
-
 
         results.append({
             "model": rnn_type,
@@ -120,15 +116,12 @@ def main():
             "f1": metrics["f1"]
         })
 
-
     results_df = pd.DataFrame(results)
 
     print("\nExperiment Results")
     print(results_df)
 
-
     results_df.to_csv("results/experiment_results.csv", index=False)
-
 
 if __name__ == "__main__":
     main()

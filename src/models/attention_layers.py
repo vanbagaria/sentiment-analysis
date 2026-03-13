@@ -1,9 +1,12 @@
 import tensorflow as tf
 from tensorflow.keras.layers import Layer
+from keras.saving import register_keras_serializable
 
+@register_keras_serializable()
 class SimpleAttention(Layer):
-    def __init__(self):
-        super(SimpleAttention, self).__init__()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def build(self, input_shape):
         self.W = self.add_weight(
@@ -19,11 +22,22 @@ class SimpleAttention(Layer):
         context = tf.reduce_sum(context, axis=1)
         return context
 
-class BahdanauAttention(Layer):
-    def __init__(self, units):
-        super(BahdanauAttention, self).__init__()
+    def get_config(self):
+        return super().get_config()
 
-        self.W1 = tf.keras.layers.Dense(units)
+from keras.saving import register_keras_serializable
+import tensorflow as tf
+from tensorflow.keras.layers import Layer
+
+
+@register_keras_serializable()
+class BahdanauAttention(Layer):
+    def __init__(self, units, **kwargs):
+        super().__init__(**kwargs)
+        self.units = units
+
+    def build(self, input_shape):
+        self.W1 = tf.keras.layers.Dense(self.units)
         self.V = tf.keras.layers.Dense(1)
 
     def call(self, values):
@@ -33,9 +47,17 @@ class BahdanauAttention(Layer):
         context_vector = tf.reduce_sum(context_vector, axis=1)
         return context_vector
 
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "units": self.units
+        })
+        return config
+
+@register_keras_serializable()
 class LuongAttention(Layer):
-    def __init__(self):
-        super(LuongAttention, self).__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def call(self, values):
         score = tf.matmul(values, values, transpose_b=True)
@@ -43,4 +65,7 @@ class LuongAttention(Layer):
         context_vector = tf.matmul(attention_weights, values)
         context_vector = tf.reduce_mean(context_vector, axis=1)
         return context_vector
+
+    def get_config(self):
+        return super().get_config()
 
