@@ -88,9 +88,9 @@ def main():
         history = model.fit(
             X_train,
             y_train,
-            validation_split=0.1,
-            epochs=5,
-            batch_size=64
+            validation_split=0.2,
+            epochs=10,
+            batch_size=32
         )
 
         model_name = f"{rnn_type}_{attention if attention else 'none'}"
