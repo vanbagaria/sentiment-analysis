@@ -1,5 +1,8 @@
-import streamlit as st
+import os
+os.environ["KERAS_BACKEND"] = "tensorflow"
+
 from inference import SentimentPredictor
+import streamlit as st
 
 st.title("Movie Review Sentiment Analyzer")
 
